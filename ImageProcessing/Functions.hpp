@@ -54,7 +54,6 @@ Image readImage(char fname[])
     cout << M << " columns and " << N << " rows" << endl;
 
     ss >> Q;
-    ss.ignore();
     cout << Q << endl;
 
     Image image(N, M, Q);
