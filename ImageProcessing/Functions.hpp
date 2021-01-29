@@ -5,11 +5,13 @@
  * Refactoring project
  */
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <stdlib.h>
+
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+
 #include "Image.h"
 using namespace std;
 
@@ -34,41 +36,48 @@ Image readImage(char fname[])
 
     if (!ifs)
     {
-        cout << "Can't read image:" << fname << endl;
+        cerr << "Can't read image:" << fname << endl;
         exit(1);
     }
 
-    getline(ifs, inputLine); //read the first line
+    getline(ifs, inputLine);  //read the first line
 
     if (inputLine.compare("P5") != 0 && inputLine.compare("P2") != 0)
     {
-        cerr << "Version error" << endl;
+        cerr << "Version error:" << endl;
+        cerr << inputLine << inputLine.compare("P5") << ", "
+             << "\n";
     }
-    cout << "Version : " << inputLine << endl;
+    cerr << "Version : " << inputLine << endl;
 
-    getline(ifs, inputLine); // read the second line : comment
-    cout << "Comment : " << inputLine << endl;
-
-    ss << ifs.rdbuf(); //read the third line : width and height
+    getline(ifs, inputLine);  // read the second line : comment
+    cerr << "Comment : " << inputLine << endl;
+    if (inputLine.find("#") < 0)
+    {
+        cerr << inputLine;
+        ss << inputLine;
+    }
+    else
+    {
+        ss << ifs.rdbuf();  //read the third line : width and height
+    }
     ss >> M >> N;
-    cout << M << " columns and " << N << " rows" << endl;
+    cerr << M << " columns and " << N << " rows" << endl;
 
     ss >> Q;
-    ss.ignore();
-    cout << Q << endl;
+    cerr << Q << endl;
 
     Image image(N, M, Q);
 
     // Read and record the pixel values into the image object
 
-    unsigned int pixel;
+    unsigned char pixel;
 
     for (i = 0; i < N; i++)
     {
         for (j = 0; j < M; j++)
         {
             ss >> pixel;
-
             image.setPixelVal(i, j, pixel);
         }
     }
@@ -83,7 +92,7 @@ Image logicAND(Image &im1, Image &im2)
 {
     if (!im1.gray == im2.gray)
     {
-        cout << "Images must have same maximum gray values" << endl;
+        cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
     int Max = im1.gray;
@@ -96,7 +105,7 @@ Image logicAND(Image &im1, Image &im2)
         for (int j = 0; j < im1.cols; j++)
         {
             pixel = newIm1.getPixelVal(i, j) && newIm2.getPixelVal(i, j);
-            val = (pixel == 1) ? 255 : 0; //NB: 255 && 255=1, 255 && 0=0
+            val = (pixel == 1) ? 255 : 0;  //NB: 255 && 255=1, 255 && 0=0
             newImage.setPixelVal(i, j, val);
         }
     }
@@ -105,10 +114,10 @@ Image logicAND(Image &im1, Image &im2)
 }
 
 Image logicNAND(Image &im1, Image &im2)
-{ //NAND=NOT(AND)
+{  //NAND=NOT(AND)
     if (!im1.gray == im2.gray)
     {
-        cout << "Images must have same maximum gray values" << endl;
+        cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
     int Max = im1.gray;
@@ -120,8 +129,8 @@ Image logicNAND(Image &im1, Image &im2)
     {
         for (int j = 0; j < im1.cols; j++)
         {
-            pixel = !(newIm1.getPixelVal(i, j) && newIm2.getPixelVal(i, j)); // im1 NAND im2
-            val = (pixel == 1) ? 255 : 0;                                    //NB: 255 && 255=1, 255 && 0=0
+            pixel = !(newIm1.getPixelVal(i, j) && newIm2.getPixelVal(i, j));  // im1 NAND im2
+            val = (pixel == 1) ? 255 : 0;                                     //NB: 255 && 255=1, 255 && 0=0
             newImage.setPixelVal(i, j, val);
         }
     }
@@ -133,7 +142,7 @@ Image logicOR(Image &im1, Image &im2)
 {
     if (!im1.gray == im2.gray)
     {
-        cout << "Images must have same maximum gray values" << endl;
+        cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
     int Max = im1.gray;
@@ -146,7 +155,7 @@ Image logicOR(Image &im1, Image &im2)
         for (int j = 0; j < im1.cols; j++)
         {
             pixel = newIm1.getPixelVal(i, j) || newIm2.getPixelVal(i, j);
-            val = (pixel == 1) ? 255 : 0; //NB: 255 && 255=1, 255 && 0=0
+            val = (pixel == 1) ? 255 : 0;  //NB: 255 && 255=1, 255 && 0=0
             newImage.setPixelVal(i, j, val);
         }
     }
@@ -155,10 +164,10 @@ Image logicOR(Image &im1, Image &im2)
 }
 
 Image logicXOR(Image &im1, Image &im2)
-{ // A XOR B=(A AND NOT B)||(NOT A AND B)
+{  // A XOR B=(A AND NOT B)||(NOT A AND B)
     if (!im1.gray == im2.gray)
     {
-        cout << "Images must have same maximum gray values" << endl;
+        cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
     int Max = im1.gray;
@@ -171,7 +180,7 @@ Image logicXOR(Image &im1, Image &im2)
         for (int j = 0; j < im1.cols; j++)
         {
             pixel = (newIm1.getPixelVal(i, j) && !(newIm2.getPixelVal(i, j))) || (newIm2.getPixelVal(i, j) && !(newIm1.getPixelVal(i, j)));
-            val = (pixel == 1) ? 255 : 0; //NB: 255 && 255=1, 255 && 0=0
+            val = (pixel == 1) ? 255 : 0;  //NB: 255 && 255=1, 255 && 0=0
             newImage.setPixelVal(i, j, val);
         }
     }
@@ -185,7 +194,7 @@ Image addition(Image &im1, Image &im2)
 {
     if (!im1.gray == im2.gray)
     {
-        cout << "Images must have same maximum gray values" << endl;
+        cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
     int Max = im1.gray;
@@ -205,10 +214,10 @@ Image addition(Image &im1, Image &im2)
 }
 
 Image subtraction(Image &im1, Image &im2)
-{ //im1-im2
+{  //im1-im2
     if (!im1.gray == im2.gray)
     {
-        cout << "Images must have same maximum gray values" << endl;
+        cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
     int Max = im1.gray;
@@ -229,7 +238,6 @@ Image subtraction(Image &im1, Image &im2)
 
 Image multiplication(Image &im, double ratio)
 {
-
     double pixel = 0;
     double val = 0;
     int Max = im.gray;
@@ -274,15 +282,15 @@ Image convolution(Image &im, double kernel[SIZE][SIZE], int kSize, int norm)
     //int mm = 0, nn = 0, ii = 0, jj = 0;
     double sum = 0;
 
-    for (int i = 0; i < im.rows; ++i) // rows
+    for (int i = 0; i < im.rows; ++i)  // rows
     {
-        for (int j = 0; j < im.cols; ++j) // columns
+        for (int j = 0; j < im.cols; ++j)  // columns
         {
-            for (int m = 0; m < kSize; ++m) // kernel rows
+            for (int m = 0; m < kSize; ++m)  // kernel rows
             {
                 int mm = kSize - 1 - m;
 
-                for (int n = 0; n < kSize; ++n) // kernel columns
+                for (int n = 0; n < kSize; ++n)  // kernel columns
                 {
                     int nn = kSize - 1 - n;
                     // ignore input samples which are out of bound
@@ -321,15 +329,15 @@ Image convo2D(Image &im, double kernel[2][2], int kSize, int norm)
     //int mm = 0, nn = 0, ii = 0, jj = 0;
     double sum = 0;
 
-    for (int i = 0; i < im.rows; ++i) // rows
+    for (int i = 0; i < im.rows; ++i)  // rows
     {
-        for (int j = 0; j < im.cols; ++j) // columns
+        for (int j = 0; j < im.cols; ++j)  // columns
         {
-            for (int m = 0; m < kSize; ++m) // kernel rows
+            for (int m = 0; m < kSize; ++m)  // kernel rows
             {
                 int mm = kSize - 1 - m;
 
-                for (int n = 0; n < kSize; ++n) // kernel columns
+                for (int n = 0; n < kSize; ++n)  // kernel columns
                 {
                     int nn = kSize - 1 - n;
                     // ignore input samples which are out of bound
@@ -382,7 +390,7 @@ Image edgeDetect(Image &im)
         {1, -4, 1},
         {0, 1, 0}};
     return (convolution(im, kern, 3, 1));
-} //Detects the edges of an image
+}  //Detects the edges of an image
 
 Image gaussFilter(Image &im)
 {
@@ -449,10 +457,10 @@ void printHistogram(Image &im)
     //Print histogram
     for (int i = 0; i < im.gray + 1; i++)
     {
-        cout << i << ": " << histogram[i] << endl;
+        cerr << i << ": " << histogram[i] << endl;
         sum += histogram[i];
     }
-    cout << "Sum of pixels= " << sum << endl;
+    cerr << "Sum of pixels= " << sum << endl;
 }
 
 int calculateContrast(Image &im)
@@ -484,7 +492,7 @@ double luminance(Image &im)
 }
 
 Image linearContrast(Image &im)
-{ //Amelioration de contrast lineaire
+{  //Amelioration de contrast lineaire
     Image newImage = Image(im.rows, im.cols, im.gray);
     int mini = minPixel(im);
     int maxi = maxPixel(im), pixel = 0;
@@ -509,7 +517,7 @@ Image linearContrastSaturation(Image &im, double sMin, double sMax)
     if ((sMin > sMax) || (sMin < minPixel(im)) || (sMax > maxPixel(im)))
     {
         //Test simples pour niveaux de saturation
-        cout << "Valeurs de saturation invalides" << endl;
+        cerr << "Valeurs de saturation invalides" << endl;
         exit(1);
     }
     Image newImage = Image(im.rows, im.cols, im.gray);
