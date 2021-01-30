@@ -28,6 +28,7 @@ Image readImage(char fname[])
     int N = 0, M = 0, Q = 0;
     unsigned char *charImage;
     char header[100], *ptr;
+    bool p2 = false;
 
     ifstream ifs(fname, ios::in | ios::binary);
 
@@ -41,7 +42,10 @@ Image readImage(char fname[])
     }
 
     getline(ifs, inputLine);  //read the first line
-
+    if (inputLine.compare("P2") == 0)
+    {
+        p2 = true;
+    }
     if (inputLine.compare("P5") != 0 && inputLine.compare("P2") != 0)
     {
         cerr << "Version error:" << endl;
@@ -68,17 +72,33 @@ Image readImage(char fname[])
     cerr << Q << endl;
 
     Image image(N, M, Q);
-
+   
+        if(p2){
+            image.p2 = true;
+        }
     // Read and record the pixel values into the image object
 
     unsigned char pixel;
-
+    int counter = 0;
+    unsigned int pixel2;
     for (i = 0; i < N; i++)
     {
         for (j = 0; j < M; j++)
         {
-            ss >> pixel;
-            image.setPixelVal(i, j, pixel);
+            if (p2)
+            {
+                ss >> pixel2;
+                pixel = (unsigned char)pixel2;
+            }
+            else
+            {
+                ss >> pixel;
+            }
+            if (counter < 10)
+            {
+                counter++;
+            }
+            image.setPixelVal(i, j, (unsigned char)pixel);
         }
     }
 

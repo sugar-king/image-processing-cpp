@@ -32,8 +32,9 @@ int main(int argc, char **argv)
     bool type;
 
     double start, end;
-    start = omp_get_wtime();
-    ofstream ofile(argv[argc-1], std::ios::out);
+    // ofstream ofile(argv[argc - 1], std::ios::out);
+    ofstream f(argv[argc - 1], std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
+
     start = omp_get_wtime();
 
     Image imageOut = runOperation(argc, argv);
@@ -42,16 +43,30 @@ int main(int argc, char **argv)
 
     cout << end - start;
 
-    //write to the output file
-    ofile << "P2\n"
-          << imageOut.cols << " " << imageOut.rows << "\n255\n";
-    for (int i = 0; i < imageOut.rows; i++)
+    // write to the output file
+    int maxColorValue = 255;
+    f << "P5\n"
+      << imageOut.cols << " " << imageOut.rows << "\n"
+      << maxColorValue << "\n";
+    // std::endl == "\n" + std::flush
+    // we do not want std::flush here.
+    cerr << (int)imageOut.pixelVal[0][0] << "\n";
+    for (int i = 0; i < imageOut.rows; ++i)
     {
-        for (int j = 0; j < imageOut.cols; j++)
-        {
-            ofile << imageOut.getPixelVal(i, j) << endl;
-        }
+        f.write(reinterpret_cast<char *>(imageOut.pixelVal[i]), imageOut.cols);
     }
+
+    // ofile << "P2\n"
+    //       << imageOut.cols << " " << imageOut.rows << "\n255\n";
+          
+
+    // for (int i = 0; i < imageOut.rows; i++)
+    // {
+    //     for (int j = 0; j < imageOut.cols; j++)
+    //     {
+    //         ofile << (int)imageOut.getPixelVal(i, j) << endl;
+    //     }
+    // }
     return 0;
 }
 
@@ -82,8 +97,8 @@ Image runOp3(char **argv)
     {
         cerr << ("Applying NOT operation on image\n");
         Image imageIn = readImage(argv[2]);
-        return imageIn;
-        // return imageIn.logicNOT();
+        // return imageIn;
+        return imageIn.logicNOT();
     }
     else if (strcmp(argv[1], "otsuBinarize") == 0)
     {
@@ -236,7 +251,7 @@ Image runOp4(char **argv)
         double factor = atof(argv[2]);
         return multiplication(imageIn1, factor);
     }
-    else if (strcmp(argv[2], "scalingNN") == 0)
+    else if (strcmp(argv[1], "scalingNN") == 0)
     {
         Image imageIn1 = readImage(argv[3]);
         double scale = atof(argv[2]);

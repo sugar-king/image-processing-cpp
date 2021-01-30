@@ -34,9 +34,10 @@ class Image
 
     Image logicNOT();  //Logic NOT operation on an image
 
-    int rows;                  //number of rows
-    int cols;                  //number of columns
-    int gray;                  //number of gray levels
+    int rows;  //number of rows
+    int cols;  //number of columns
+    int gray;  //number of gray levels
+    bool p2;
     unsigned char **pixelVal;  //2D array containing pixel values
 };
 

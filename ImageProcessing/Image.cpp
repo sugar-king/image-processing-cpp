@@ -110,8 +110,7 @@ Image Image::threshold(int threshold)
 
 Image Image::logicNOT()
 {
-    return *this;
-    int pixel = 0, val = 0;
+    unsigned char pixel = 0, val = 0;
 
     Image newImage = *this;
 
@@ -125,8 +124,6 @@ Image Image::logicNOT()
 
             newImage.setPixelVal(i, j, val);
         }
-  
-
     }
 
     return newImage;
@@ -141,7 +138,7 @@ Image Image::otsuBinarize()
     {
         for (int j = 0; j < cols; j++)
         {
-            int pixel = getPixelVal(i, j);
+            unsigned char pixel = getPixelVal(i, j);
             histogram[pixel]++;
         }
     }
