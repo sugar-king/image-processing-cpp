@@ -26,8 +26,8 @@ public:
     //virtual ~Image();
     void setImageInfo(int numRows, int numCols, int maxVal);
     void getImageInfo(int &numRows, int &numCols, int &maxVal);
-    int getPixelVal(int row, int col);
-    void setPixelVal(int row, int col, int value);
+    unsigned char getPixelVal(int row, int col);
+    void setPixelVal(int row, int col, unsigned char value);
     bool inBounds(int row, int col); //checks to see if pixel is in the bounds
     Image threshold(int threshold);  //binarize a grayscale image
     Image otsuBinarize();            //Binarize grayscale image based on Otsu's thresholding method
@@ -37,7 +37,8 @@ public:
     int rows;       //number of rows
     int cols;       //number of columns
     int gray;       //number of gray levels
-    int **pixelVal; //2D array containing pixel values
+    bool p2;
+    unsigned char **pixelVal; //2D array containing pixel values
 };
 
 #endif /* IMAGE_H */

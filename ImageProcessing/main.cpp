@@ -14,8 +14,9 @@
  * 
  */
 
-#include "Functions.hpp"
 #include <string.h>
+
+#include "Functions.hpp"
 
 Image runOperation(int argc, char **argv);
 Image runOp3(char **argv);
@@ -25,9 +26,6 @@ void printHelp();
 
 int main(int argc, char **argv)
 {
-    int M = 0, N = 0, Q = 0; // rows, cols, grayscale
-    int val;
-    bool type;
     ofstream ofile("output.pgm", std::ios::out);
 
     Image imageOut = runOperation(argc, argv);
@@ -35,11 +33,12 @@ int main(int argc, char **argv)
     //write to the output file
     ofile << "P2\n"
           << imageOut.cols << " " << imageOut.rows << "\n255\n";
+    cerr << (int)imageOut.getPixelVal(0, 0);
     for (int i = 0; i < imageOut.rows; i++)
     {
         for (int j = 0; j < imageOut.cols; j++)
         {
-            ofile << imageOut.getPixelVal(i, j) << endl;
+            ofile << (int)imageOut.getPixelVal(i, j) << endl;
         }
     }
 
@@ -50,20 +49,20 @@ Image runOperation(int argc, char **argv)
 {
     switch (argc)
     {
-    case 3:
-        return runOp3(argv);
-        break;
+        case 3:
+            return runOp3(argv);
+            break;
 
-    case 4:
-        return runOp4(argv);
-        break;
+        case 4:
+            return runOp4(argv);
+            break;
 
-    case 5:
-        return runOp5(argv);
-        break;
+        case 5:
+            return runOp5(argv);
+            break;
 
-    default:
-        printHelp();
+        default:
+            printHelp();
     }
 }
 
@@ -73,6 +72,7 @@ Image runOp3(char **argv)
     {
         printf("Applying NOT operation on image\n");
         Image imageIn = readImage(argv[2]);
+        return imageIn;
         return imageIn.logicNOT();
     }
     else if (strcmp(argv[1], "otsuBinarize") == 0)
@@ -255,12 +255,13 @@ Image runOp5(char **argv)
 }
 void printHelp()
 {
-    printf("--------------------Help---------------------\n"
-           "- You must enter 3, 4, or 5 arguments (including the program name)\n"
-           "- E.g. To apply NOT operation on an image: ./app not images/lena.pgm\n"
-           "- To ADD two images: ./app images/lena.pgm add images/aya.pgm\n"
-           "- To MULT an image by 2: ./app mult 2 images/lena.pgm \n"
-           "- See README for more info on other operations\n"
-           "---------------------------------------------\n"
-           "- Contact me: petersonyuhala@gmail.com\n");
+    printf(
+        "--------------------Help---------------------\n"
+        "- You must enter 3, 4, or 5 arguments (including the program name)\n"
+        "- E.g. To apply NOT operation on an image: ./app not images/lena.pgm\n"
+        "- To ADD two images: ./app images/lena.pgm add images/aya.pgm\n"
+        "- To MULT an image by 2: ./app mult 2 images/lena.pgm \n"
+        "- See README for more info on other operations\n"
+        "---------------------------------------------\n"
+        "- Contact me: petersonyuhala@gmail.com\n");
 }

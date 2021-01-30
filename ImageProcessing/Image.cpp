@@ -34,10 +34,10 @@ Image::Image(int numRows, int numCols, int grayLevels)
     cols = numCols;
     gray = grayLevels;
 
-    pixelVal = new int*[rows];
+    pixelVal = new unsigned char*[rows];
     for (int i = 0; i < rows; i++)
     {
-        pixelVal[i] = new int[cols];
+        pixelVal[i] = new unsigned char[cols];
         for (int j = 0; j < cols; j++)
         {
             pixelVal[i][j] = 0;
@@ -51,10 +51,10 @@ Image::Image(const Image& oldImage)
     cols = oldImage.cols;
     gray = oldImage.gray;
 
-    pixelVal = new int*[rows];
+    pixelVal = new unsigned char*[rows];
     for (int i = 0; i < rows; i++)
     {
-        pixelVal[i] = new int[cols];
+        pixelVal[i] = new unsigned char[cols];
         for (int j = 0; j < cols; j++)
             pixelVal[i][j] = oldImage.pixelVal[i][j];
     }
@@ -72,12 +72,12 @@ Image::~Image()
     delete pixelVal;
 }
 
-int Image::getPixelVal(int row, int col)
+unsigned char Image::getPixelVal(int row, int col)
 /*returns the gray value of a specific pixel*/ {
     return pixelVal[row][col];
 }
 
-void Image::setPixelVal(int row, int col, int value)
+void Image::setPixelVal(int row, int col, unsigned char value)
 {
     pixelVal[row][col] = value;
 }
@@ -110,7 +110,7 @@ Image Image::threshold(int threshold)
 
 Image Image::logicNOT()
 {
-    int pixel = 0, val = 0;
+    unsigned char pixel = 0, val = 0;
 
     Image newImage = *this;
 
@@ -131,13 +131,13 @@ Image Image::logicNOT()
 Image Image::otsuBinarize()
 {
     double histogram[gray + 1] = {0};
-    int sum = 0;
+    long long sum = 0;
     //Calculate image histogram
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
         {
-            int pixel = getPixelVal(i, j);
+            unsigned char pixel = getPixelVal(i, j);
             histogram[pixel]++;
         }
     }
