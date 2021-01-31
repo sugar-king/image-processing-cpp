@@ -33,7 +33,7 @@ Resulting images are saved to the `filtered` folder. Images with suffix `_0` wer
 
 
 ## Results
-While the time of image processing was reduced, further optimizations would make that effect even more visible. Below is the table of some of the results. All results can be found in the `results` folder. All times are in milliseconds (ms). 
+While the time of image processing was reduced, further optimizations would make that effect even more visible. Below is the table of some of the results. All results can be found in the `results` folder. All times are in seconds(s). 
 
 |Filter         | Original  | Parallelized  |
 |:---:          |   :---:   |   :---:       |
