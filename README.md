@@ -1,7 +1,8 @@
 # Image-Processing-cpp
 > This project was created as part of the [Parallelism and Concurrency](https://www.fer.unizg.hr/en/course/bopsaa) course on [University of Zagreb, Faculty of Electrical Engineering and Computing](https://www.fer.unizg.hr/en). 
 >
-> Parallelization was applied to an existing project [Image-Processing-cpp](https://github.com/Yuhala/image-processing-cpp). For more details about the project itself, go to it's [GitHub repository](https://github.com/Yuhala/image-processing-cpp). 
+> Parallelization was applied to an existing project [Image-Processing-cpp](https://github.com/Yuhala/image-processing-cpp). For more details about the project itself, go to it's [GitHub repository](https://github.com/Yuhala/image-processing-cpp). Parallelization was done using [OpenMP API](https://www.openmp.org/). 
+ 
 
 
 ## Parallelization
