@@ -72,10 +72,11 @@ Image readImage(char fname[])
     cerr << Q << endl;
 
     Image image(N, M, Q);
-   
-        if(p2){
-            image.p2 = true;
-        }
+
+    if (p2)
+    {
+        image.p2 = true;
+    }
     // Read and record the pixel values into the image object
 
     unsigned char pixel;
@@ -98,7 +99,7 @@ Image readImage(char fname[])
             {
                 counter++;
             }
-            image.setPixelVal(i, j, (unsigned char)pixel);
+            image.pixelVal[i][j] = (unsigned char)pixel;
         }
     }
 
@@ -115,18 +116,19 @@ Image logicAND(Image &im1, Image &im2)
         cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
-    int Max = im1.gray;
-    int pixel = 0, val = 0;
+    unsigned char pixel = 0, val = 0;
     Image newIm1 = im1.otsuBinarize();
     Image newIm2 = im2.otsuBinarize();
     Image newImage = Image(im1.rows, im1.cols, im1.gray);
+
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im1.rows; i++)
     {
         for (int j = 0; j < im1.cols; j++)
         {
-            pixel = newIm1.getPixelVal(i, j) && newIm2.getPixelVal(i, j);
+            pixel = newIm1.pixelVal[i][j] && newIm2.pixelVal[i][j];
             val = (pixel == 1) ? 255 : 0;  //NB: 255 && 255=1, 255 && 0=0
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -140,18 +142,19 @@ Image logicNAND(Image &im1, Image &im2)
         cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
-    int Max = im1.gray;
-    int pixel = 0, val = 0;
+    unsigned char pixel = 0, val = 0;
     Image newIm1 = im1.otsuBinarize();
     Image newIm2 = im2.otsuBinarize();
     Image newImage = Image(im1.rows, im1.cols, im1.gray);
+
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im1.rows; i++)
     {
         for (int j = 0; j < im1.cols; j++)
         {
-            pixel = !(newIm1.getPixelVal(i, j) && newIm2.getPixelVal(i, j));  // im1 NAND im2
-            val = (pixel == 1) ? 255 : 0;                                     //NB: 255 && 255=1, 255 && 0=0
-            newImage.setPixelVal(i, j, val);
+            pixel = !(newIm1.pixelVal[i][j] && newIm2.pixelVal[i][j]);  // im1 NAND im2
+            val = (pixel == 1) ? 255 : 0;                               //NB: 255 && 255=1, 255 && 0=0
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -165,18 +168,19 @@ Image logicOR(Image &im1, Image &im2)
         cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
-    int Max = im1.gray;
     int pixel = 0, val = 0;
     Image newIm1 = im1.otsuBinarize();
     Image newIm2 = im2.otsuBinarize();
     Image newImage = Image(im1.rows, im1.cols, im1.gray);
+
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im1.rows; i++)
     {
         for (int j = 0; j < im1.cols; j++)
         {
-            pixel = newIm1.getPixelVal(i, j) || newIm2.getPixelVal(i, j);
+            pixel = newIm1.pixelVal[i][j] || newIm2.pixelVal[i][j];
             val = (pixel == 1) ? 255 : 0;  //NB: 255 && 255=1, 255 && 0=0
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -190,18 +194,19 @@ Image logicXOR(Image &im1, Image &im2)
         cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
-    int Max = im1.gray;
     int pixel = 0, val = 0;
     Image newIm1 = im1.otsuBinarize();
     Image newIm2 = im2.otsuBinarize();
     Image newImage = Image(im1.rows, im1.cols, im1.gray);
+
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im1.rows; i++)
     {
         for (int j = 0; j < im1.cols; j++)
         {
-            pixel = (newIm1.getPixelVal(i, j) && !(newIm2.getPixelVal(i, j))) || (newIm2.getPixelVal(i, j) && !(newIm1.getPixelVal(i, j)));
+            pixel = (newIm1.pixelVal[i][j] && !(newIm2.pixelVal[i][j])) || (newIm2.pixelVal[i][j] && !(newIm1.pixelVal[i][j]));
             val = (pixel == 1) ? 255 : 0;  //NB: 255 && 255=1, 255 && 0=0
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -217,16 +222,18 @@ Image addition(Image &im1, Image &im2)
         cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
-    int Max = im1.gray;
     int pixel = 0, val = 0;
+    int Max = im1.gray;
     Image newImage = Image(im1.rows, im1.cols, im1.gray);
+
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im1.rows; i++)
     {
         for (int j = 0; j < im1.cols; j++)
         {
-            pixel = im1.getPixelVal(i, j) + im2.getPixelVal(i, j);
+            pixel = im1.pixelVal[i][j] + im2.pixelVal[i][j];
             val = (int)min(pixel, Max);
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -240,16 +247,17 @@ Image subtraction(Image &im1, Image &im2)
         cerr << "Images must have same maximum gray values" << endl;
         exit(1);
     }
-    int Max = im1.gray;
     int pixel = 0, val = 0;
     Image newImage = Image(im1.rows, im1.cols, im1.gray);
+
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im1.rows; i++)
     {
         for (int j = 0; j < im1.cols; j++)
         {
-            pixel = im1.getPixelVal(i, j) - im2.getPixelVal(i, j);
+            pixel = im1.pixelVal[i][j] - im2.pixelVal[i][j];
             val = (int)max(pixel, 0);
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -262,13 +270,15 @@ Image multiplication(Image &im, double ratio)
     double val = 0;
     int Max = im.gray;
     Image newImage = Image(im.rows, im.cols, im.gray);
+
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im.rows; i++)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            pixel = im.getPixelVal(i, j) * ratio;
+            pixel = im.pixelVal[i][j] * ratio;
             val = min(pixel, Max);
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -302,6 +312,7 @@ Image convolution(Image &im, double kernel[SIZE][SIZE], int kSize, int norm)
     //int mm = 0, nn = 0, ii = 0, jj = 0;
     double sum = 0;
 
+//#pragma omp parallel for private(sum)
     for (int i = 0; i < im.rows; ++i)  // rows
     {
         for (int j = 0; j < im.cols; ++j)  // columns
@@ -325,14 +336,14 @@ Image convolution(Image &im, double kernel[SIZE][SIZE], int kSize, int norm)
                     if (jj >= im.cols)
                         jj = jj - 1;
                     if (ii >= 0 && ii < im.rows && jj >= 0 && jj < im.cols)
-                        sum += im.getPixelVal(ii, jj) * kernel[mm][nn];
+                        sum += im.pixelVal[ii][jj] * kernel[mm][nn];
                 }
             }
 
             double val = sum / norm;
 
             val = val < 0 ? 0 : min(val, im.gray);
-            newImage.setPixelVal(i, j, (int)val);
+            newImage.pixelVal[i][j] = (int)val;
             sum = 0;
         }
     }
@@ -349,6 +360,7 @@ Image convo2D(Image &im, double kernel[2][2], int kSize, int norm)
     //int mm = 0, nn = 0, ii = 0, jj = 0;
     double sum = 0;
 
+//#pragma omp parallel for private(sum)
     for (int i = 0; i < im.rows; ++i)  // rows
     {
         for (int j = 0; j < im.cols; ++j)  // columns
@@ -372,14 +384,14 @@ Image convo2D(Image &im, double kernel[2][2], int kSize, int norm)
                     if (jj >= im.cols)
                         jj = jj - 1;
                     if (ii >= 0 && ii < im.rows && jj >= 0 && jj < im.cols)
-                        sum += im.getPixelVal(ii, jj) * kernel[mm][nn];
+                        sum += im.pixelVal[ii][jj] * kernel[mm][nn];
                 }
             }
 
             double val = sum / norm;
 
             val = val < 0 ? 0 : min(val, im.gray);
-            newImage.setPixelVal(i, j, (int)val);
+            newImage.pixelVal[i][j] = (int)val;
             sum = 0;
         }
     }
@@ -470,7 +482,7 @@ void printHistogram(Image &im)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            int pixel = im.getPixelVal(i, j);
+            int pixel = im.pixelVal[i][j];
             histogram[pixel]++;
         }
     }
@@ -504,7 +516,7 @@ double luminance(Image &im)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            sum += im.getPixelVal(i, j);
+            sum += im.pixelVal[i][j];
         }
     }
     lum = sum / total;
@@ -518,13 +530,14 @@ Image linearContrast(Image &im)
     int maxi = maxPixel(im), pixel = 0;
     int val = 0;
 
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im.rows; i++)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            pixel = im.getPixelVal(i, j);
+            pixel = im.pixelVal[i][j];
             val = im.gray * (pixel - mini) / (maxi - mini);
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
     return newImage;
@@ -543,15 +556,16 @@ Image linearContrastSaturation(Image &im, double sMin, double sMax)
     Image newImage = Image(im.rows, im.cols, im.gray);
     int val = 0, pixel = 0;
 
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im.rows; i++)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            pixel = im.getPixelVal(i, j);
+            pixel = im.pixelVal[i][j];
             val = im.gray * (pixel - sMin) / (sMax - sMin);
             val = val < 0 ? 0 : val;
             val = val > im.gray ? im.gray : val;
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -569,20 +583,25 @@ Image histogramEquilization(Image &im)
     double nbp = im.cols * im.rows;
     int sum = 0;
     //Calculate image histogram
+
+//#pragma omp parallel for default(shared) private(pixel)
     for (int i = 0; i < im.rows; i++)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            int pixel = im.getPixelVal(i, j);
+            pixel = im.pixelVal[i][j];
+//#pragma omp atomic
             histogram[pixel]++;
         }
     }
-    //Normalise the histogram
+//Normalise the histogram
+//#pragma omp parallel for default(shared)
     for (int i = 0; i < im.gray + 1; i++)
     {
         hn[i] = histogram[i] / nbp;
     }
-    //Densite de probabilité normalisé
+//Densite de probabilité normalisé
+//#pragma omp parallel for default(shared)
     for (int i = 0; i < im.gray + 1; i++)
     {
         for (int j = 0; j < i; j++)
@@ -590,14 +609,16 @@ Image histogramEquilization(Image &im)
             ci[i] += hn[j];
         }
     }
-    //Transformation des niveau de gris de l'image
+//Transformation des niveau de gris de l'image
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < im.rows; i++)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            pixel = im.getPixelVal(i, j);
+            pixel = im.pixelVal[i][j];
+//#pragma omp critical
             val = ci[pixel] * im.gray;
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -631,11 +652,12 @@ Image scalingNN(Image &im, double scale)
 {
     int pixels[im.cols * im.rows] = {0};
     //Put image pixels in 1D array
+//#pragma omp parallel for default(shared)
     for (int i = 0; i < im.rows; i++)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            pixels[j * im.rows + i] = im.getPixelVal(i, j);
+            pixels[j * im.rows + i] = im.pixelVal[i][j];
         }
     }
 
@@ -645,6 +667,8 @@ Image scalingNN(Image &im, double scale)
     int temp[destH * destW] = {0};
     int px = 0, py = 0, pixel = 0;
     Image newImage = Image(destH, destW, im.gray);
+
+//#pragma omp parallel for default(shared) private(py, px)
     for (int i = 0; i < destH; i++)
     {
         for (int j = 0; j < destW; j++)
@@ -656,11 +680,12 @@ Image scalingNN(Image &im, double scale)
         }
     }
     //Put temp pixels in final image
+//#pragma omp parallel for default(shared)
     for (int i = 0; i < destH; i++)
     {
         for (int j = 0; j < destW; j++)
         {
-            newImage.setPixelVal(i, j, temp[j * destH + i]);
+            newImage.pixelVal[i][j] = temp[j * destH + i];
         }
     }
 
@@ -674,12 +699,13 @@ Image mirror(Image &im)
     Image newImage = Image(im.rows, im.cols, im.gray);
     int pixel = 0;
 
+//#pragma omp parallel for default(shared) private(pixel)
     for (int i = 0; i < im.rows; i++)
     {
         for (int lx = 0, rx = im.cols - 1; lx < im.cols; lx++, rx--)
         {
-            pixel = im.getPixelVal(i, lx);
-            newImage.setPixelVal(i, rx, pixel);
+            pixel = im.pixelVal[i][lx];
+            newImage.pixelVal[i][rx] = pixel;
         }
     }
 
@@ -712,12 +738,15 @@ int maxPixel(Image &im)
     int maxi = 0, pixel = 0;
     int val = 0;
 
+//#pragma omp parallel for private(pixel)
     for (int i = 0; i < im.rows; i++)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            pixel = im.getPixelVal(i, j);
-            maxi = (int)max(pixel, maxi);
+            pixel = im.pixelVal[i][j];
+            if (pixel > maxi)
+//#pragma omp critical
+                maxi = pixel;
         }
     }
     return maxi;
@@ -727,13 +756,15 @@ int minPixel(Image &im)
 {
     int mini = im.gray, pixel = 0;
     int val = 0;
-
+//#pragma omp parallel for private(pixel)
     for (int i = 0; i < im.rows; i++)
     {
         for (int j = 0; j < im.cols; j++)
         {
-            pixel = im.getPixelVal(i, j);
-            mini = (int)min(pixel, mini);
+            pixel = im.pixelVal[i][j];
+            if (pixel < mini)
+//#pragma omp critical
+                mini = pixel;
         }
     }
     return mini;

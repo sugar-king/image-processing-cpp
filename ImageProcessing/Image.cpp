@@ -14,11 +14,14 @@
  */
 #include "Image.h"
 
+#include <omp.h>
 #include <stdlib.h>
 
 #include <cmath>
 #include <iostream>
 using namespace std;
+
+const int NUM_THREADS = 4;
 
 Image::Image()
 {
@@ -52,6 +55,8 @@ Image::Image(const Image& oldImage)
     gray = oldImage.gray;
 
     pixelVal = new unsigned char*[rows];
+
+//#pragma omp parallel for
     for (int i = 0; i < rows; i++)
     {
         pixelVal[i] = new unsigned char[cols];
@@ -94,14 +99,15 @@ Image Image::threshold(int threshold)
 {
     unsigned char pixel = 0, val = 0;
     Image newImage(rows, cols, gray);
+//#pragma omp parallel for default(shared) private(pixel, val)
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
         {
-            pixel = this->getPixelVal(i, j);
+            pixel = this->pixelVal[i][j];
             val = pixel >= threshold ? gray : 0;
 
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -112,17 +118,17 @@ Image Image::logicNOT()
 {
     unsigned char pixel = 0, val = 0;
 
-    Image newImage = *this;
+    Image newImage(*this);
 
+//#pragma omp parallel for private(pixel, val)
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
         {
-          
-            pixel = newImage.getPixelVal(i, j);
+            pixel = newImage.pixelVal[i][j];
             val = 255 - pixel;
 
-            newImage.setPixelVal(i, j, val);
+            newImage.pixelVal[i][j] = val;
         }
     }
 
@@ -133,21 +139,26 @@ Image Image::otsuBinarize()
 {
     double histogram[gray + 1] = {0};
     long long sum = 0;
-    //Calculate image histogram
+//Calculate image histogram
+//#pragma omp parallel for default(shared)
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
         {
-            unsigned char pixel = getPixelVal(i, j);
+            unsigned char pixel = pixelVal[i][j];
             histogram[pixel]++;
         }
     }
-    //Calculate pixel sum
+//Calculate pixel sum
+//#pragma omp parallel for reduction(+ \
+                                   : sum)
     for (int i = 0; i < gray + 1; i++)
     {
         sum += histogram[i];
     }
-    //Find pixel probabilities
+
+//Find pixel probabilities
+//#pragma omp parallel for
     for (int i = 0; i < gray + 1; i++)
     {
         histogram[i] = (double)histogram[i] / (double)sum;
@@ -163,7 +174,7 @@ Image Image::otsuBinarize()
     mean = class mean
     between = between class variance
     */
-
+//#pragma omp parallel for
     for (int i = 0; i < gray + 1; i++)
     {
         probability[i] = 0.0;
@@ -182,6 +193,7 @@ Image Image::otsuBinarize()
     threshold = 0;
     max_between = 0.0;
 
+//#pragma omp parallel for default(shared)
     for (int i = 0; i < 255; i++)
     {
         if (probability[i] != 0.0 && probability[i] != 1.0)
